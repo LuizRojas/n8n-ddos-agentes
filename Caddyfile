@@ -1,0 +1,19 @@
+lab-galaxia.duckdns.org:8443 {
+    tls {
+        dns duckdns 8be0d759-71f7-4e9a-95db-6e280b74a87f
+    }
+
+    # Remova ou comente a linha "redir" se você a adicionou anteriormente
+    # redir / https://{host}{uri}
+
+    reverse_proxy n8n:5678 {
+        header_up Host {http.request.host}
+        header_up X-Forwarded-For {http.request.remote}
+        header_up X-Forwarded-Proto {http.request.scheme}
+    }
+}
+
+# Opcional: Se quiser que a porta 80 tente redirecionar para a 8443, mas provavelmente estará bloqueada
+# lab-galaxia.duckdns.org:80 {
+#     redir https://{host}:8443{uri}
+# }

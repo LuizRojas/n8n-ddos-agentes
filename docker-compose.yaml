@@ -1,37 +1,35 @@
 services:
   n8n:
-    image: n8nio/n8n
+    image: n8nio/n8n:1.39.0 # Use a versão mais recente ou uma específica que funcione
     restart: always
     ports:
-      - "5678:5678"
-    environment:
-      # Credenciais do n8n - Puxadas do .env
-      - N8N_BASIC_AUTH_ACTIVE=true
-      - N8N_BASIC_AUTH_USER=${N8N_BASIC_AUTH_USER}
-      - N8N_BASIC_AUTH_PASSWORD=${N8N_BASIC_AUTH_PASSWORD}
+      - "5678:5678" # Mapeia a porta 5678 do seu host para o container
 
-      # URL do n8n - Puxadas do .env
-      - WEBHOOK_URL=${WEBHOOK_URL}
-      - N8N_HOST=${N8N_HOST}
+    environment:
+      # Configurações de Autenticação Básica (essencial para segurança, mesmo local)
+      - N8N_BASIC_AUTH_ACTIVE=true
+      - N8N_BASIC_AUTH_USER=seu_usuario_seguro_n8n # MUDE ISSO!
+      - N8N_BASIC_AUTH_PASSWORD=sua_senha_super_segura_n8n # MUDE ISSO!
+
+      # URL para acesso local (http) - O n8n usará isso para gerar URLs de webhook
+      - WEBHOOK_URL=http://192.168.1.144:5678/ # Ex: http://192.168.1.144:5678/
+      - N8N_HOST=192.168.1.144 # Ex: 192.168.1.144
       - N8N_PORT=5678
       - N8N_PROTOCOL=http
+
+      # Configurações de Timezone
       - GENERIC_TIMEZONE=America/Sao_Paulo
       - TZ=America/Sao_Paulo
 
-      # Configurações para o Neon DB (PostgreSQL) - Puxadas do .env
-      - DB_TYPE=postgresdb
-      - DB_POSTGRESDB_HOST=${DB_POSTGRESDB_HOST}
-      - DB_POSTGRESDB_PORT=${DB_POSTGRESDB_PORT}
-      - DB_POSTGRESDB_DATABASE=${DB_POSTGRESDB_DATABASE}
-      - DB_POSTGRESDB_USER=${DB_POSTGRESDB_USER}
-      - DB_POSTGRESDB_PASSWORD=${DB_POSTGRESDB_PASSWORD}
-      - DB_POSTGRESDB_SSL_REJECT_UNAUTHORIZED=true
-
+      # Não há variáveis de banco de dados externo aqui, o n8n usará SQLite por padrão
+      # O n8n cria um arquivo SQLite dentro do volume /home/node/.n8n
     volumes:
-      - ~/.n8n:/home/node/.n8n
-    networks:
-      - n8n_network
+      - ~/.n8n:/home/node/.n8n # Persiste os dados do n8n no seu host
+    # Nenhuma rede externa explícita é necessária para SQLite
+    # networks:
+    #   - n8n_network # Comentar ou remover se não houver outros serviços
 
-networks:
-  n8n_network:
-    driver: bridge
+# Se você removeu a seção networks do n8n acima, remova essa também
+# networks:
+#   n8n_network:
+#     driver: bridge
