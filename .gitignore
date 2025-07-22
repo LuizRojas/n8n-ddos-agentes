@@ -1,3 +1,5 @@
-.env
-*log*
+apache_logs/
+n8n_data/
 data/
+.env
+
