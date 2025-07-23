@@ -37,13 +37,6 @@ services:
     networks:
       - n8n_network
 
-  # kali-linux:
-  #   build: ./kali_linux
-  #   restart: always
-  #   # volumes:
-  #   networks:
-  #     - n8n_network
-
 networks:
   n8n_network:
     driver: bridge
