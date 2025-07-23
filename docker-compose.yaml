@@ -20,7 +20,8 @@ services:
       - TZ=America/Sao_Paulo
 
     volumes:
-      - ./n8n_data:/home/node/.n8n # CAMINHO RELATIVO PARA OS DADOS DO N8N
+      - ./n8n_data:/home/node/.n8n  # CAMINHO RELATIVO PARA OS DADOS DO N8N
+      - ./apache_logs:/apache_logs_host  # monta os logs do Apache no n8n
     networks:
       - n8n_network
 
@@ -30,11 +31,18 @@ services:
     ports:
       - "8080:80"
     volumes:
-      - ./apache_www:/usr/local/apache2/htdocs/ # CAMINHO RELATIVO PARA ARQUIVOS HTML
       - ./apache_conf/httpd.conf:/usr/local/apache2/conf/httpd.conf
+      - ./apache_www:/usr/local/apache2/htdocs/ # CAMINHO RELATIVO PARA ARQUIVOS HTML
       - ./apache_logs:/usr/local/apache2/logs/
     networks:
       - n8n_network
+
+  # kali-linux:
+  #   build: ./kali_linux
+  #   restart: always
+  #   # volumes:
+  #   networks:
+  #     - n8n_network
 
 networks:
   n8n_network:
