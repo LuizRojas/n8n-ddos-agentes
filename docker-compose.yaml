@@ -28,8 +28,8 @@ services:
   apache-target:
     image: httpd:latest
     restart: always
-    ports:
-      - "8080:80"
+    # ports:
+      # - "8080:80"
     volumes:
       - ./apache_conf/httpd.conf:/usr/local/apache2/conf/httpd.conf
       - ./apache_www:/usr/local/apache2/htdocs/ # CAMINHO RELATIVO PARA ARQUIVOS HTML
@@ -37,6 +37,36 @@ services:
     networks:
       - n8n_network
 
+  nginx:
+    image: nginx:latest
+    container_name: ddos_nginx_proxy
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx_conf:/etc/nginx/conf.d:ro
+    networks:
+      - n8n_network
+    depends_on:
+      - apache-target
+
+  ml_api:
+    build: . 
+    container_name: ddos_ml_api
+    ports:
+      - "8000:8000" # Mapeia a porta da API ML do host
+    volumes:
+      - ./models:/app/models:ro # Monta a pasta de modelos ML
+      - ./src:/app/src:ro # Monta o código fonte da API (para --reload em dev)
+    working_dir: /app # Define o diretório de trabalho dentro do contêiner
+    command: uvicorn src.api.main:app --host 0.0.0.0 --port 8000
+    networks:
+      - n8n_network
+    environment:
+      - PYTHONUNBUFFERED=1 # Para ver logs imediatamente
+      
 networks:
   n8n_network:
     driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16

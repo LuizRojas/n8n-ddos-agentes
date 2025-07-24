@@ -3,6 +3,7 @@
 import joblib
 import pandas as pd
 import numpy as np
+import os
 from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import classification_report, confusion_matrix, accuracy_score
@@ -112,3 +113,7 @@ def train_and_save_model():
 # def clean_and_prepare_data(df: pd.DataFrame) -> Tuple[pd.DataFrame, pd.Series, LabelEncoder, StandardScaler]:
 # E no final da função, onde você tem `return X, pd.Series(y, name='Target'), label_encoder`, mude para:
 # `return X, pd.Series(y, name='Target'), label_encoder, scaler`
+
+if __name__ == "__main__":
+    # Esta linha irá iniciar todo o processo de treinamento e salvamento do modelo
+    train_and_save_model()

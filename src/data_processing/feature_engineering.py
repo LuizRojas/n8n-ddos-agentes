@@ -110,7 +110,7 @@ def clean_and_prepare_data(df: pd.DataFrame) -> Tuple[pd.DataFrame, pd.Series, L
     print(X.head())
 
     print("\n--- Data Cleaning and Feature Engineering Complete ---")
-    return X, pd.Series(y, name='Target'), label_encoder
+    return X, pd.Series(y, name='Target'), label_encoder, scaler
 
 # --- Exemplo de uso (para teste local do feature_engineering.py) ---
 if __name__ == "__main__":
