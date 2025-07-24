@@ -1,6 +1,6 @@
+__pycache__/
 apache_logs/
 n8n_data/
 datasets/
 .venv/
 .env
-
