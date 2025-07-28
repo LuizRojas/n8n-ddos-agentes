@@ -103,6 +103,7 @@ def train_and_save_model():
 
     # Salvar a ordem das features para uso na API
     joblib.dump(X.columns.tolist(), os.path.join(MODELS_DIR, FEATURE_ORDER_FILENAME))
+    print(X.columns.tolist())
     print(f"Feature order saved to: {os.path.join(MODELS_DIR, FEATURE_ORDER_FILENAME)}")
 
     print("\nModel training and saving process complete!")

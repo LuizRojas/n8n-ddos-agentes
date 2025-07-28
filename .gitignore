@@ -1,5 +1,5 @@
-apache_logs/
 __pycache__/
+apache_logs/
 n8n_data/
 datasets/
 models/

@@ -1,5 +1,3 @@
-# src/api/schemas/prediction_schemas.py
-
 from pydantic import BaseModel, Field
 from typing import Dict, Any
 
@@ -7,8 +5,9 @@ class FeaturesInput(BaseModel):
     """
     Schema for input features for DDoS attack prediction.
     The field names and types must match the features used during model training
-    after all preprocessing and feature engineering steps.
+    after all preprocessing and feature engineering steps (from X.columns.tolist()).
     """
+    # Features from your X.columns.tolist() output:
     Destination_Port: int = Field(..., description="Destination Port of the flow")
     Flow_Duration: int = Field(..., description="Duration of the flow in microseconds")
     Total_Fwd_Packets: int = Field(..., description="Total number of packets in the forward direction")
@@ -40,9 +39,7 @@ class FeaturesInput(BaseModel):
     Bwd_IAT_Max: float = Field(..., description="Maximum inter-arrival time of backward packets")
     Bwd_IAT_Min: float = Field(..., description="Minimum inter-arrival time of backward packets")
     Fwd_PSH_Flags: int = Field(..., description="Number of PSH flags in forward packets")
-    Bwd_PSH_Flags: int = Field(..., description="Number of PSH flags in backward packets")
-    Fwd_URG_Flags: int = Field(..., description="Number of URG flags in forward packets")
-    Bwd_URG_Flags: int = Field(..., description="Number of URG flags in backward packets")
+    Fwd_URG_Flags: int = Field(..., description="Number of URG flags in forward packets") # Note: Bwd PSH/URG flags not in this list
     Fwd_Header_Length: int = Field(..., description="Total bytes of IP/TCP headers in forward direction")
     Bwd_Header_Length: int = Field(..., description="Total bytes of IP/TCP headers in backward direction")
     Fwd_Packets_s: float = Field(..., description="Number of forward packets per second")
@@ -64,15 +61,7 @@ class FeaturesInput(BaseModel):
     Average_Packet_Size: float = Field(..., description="Average size of packets in the flow")
     Avg_Fwd_Segment_Size: float = Field(..., description="Average size of forward segments")
     Avg_Bwd_Segment_Size: float = Field(..., description="Average size of backward segments")
-    # Fwd_Header_Length (duplicado na sua lista original, se for o caso no seu CSV,
-    # ele se tornaria uma única feature após o stripping de nome e seleção de colunas)
-    # Reconfirme se no seu X.columns.tolist() ele aparece apenas uma vez.
-    Fwd_Avg_Bytes_Bulk: float = Field(..., description="Average bytes per bulk in forward direction")
-    Fwd_Avg_Packets_Bulk: float = Field(..., description="Average packets per bulk in forward direction")
-    Fwd_Avg_Bulk_Rate: float = Field(..., description="Average bulk rate in forward direction")
-    Bwd_Avg_Bytes_Bulk: float = Field(..., description="Average bytes per bulk in backward direction")
-    Bwd_Avg_Packets_Bulk: float = Field(..., description="Average packets per bulk in backward direction")
-    Bwd_Avg_Bulk_Rate: float = Field(..., description="Average bulk rate in backward direction")
+    Fwd_Header_Length_1: int = Field(..., description="Forward Header Length (duplicate from dataset)") # Changed to _1
     Subflow_Fwd_Packets: int = Field(..., description="Number of packets in forward subflows")
     Subflow_Fwd_Bytes: float = Field(..., description="Number of bytes in forward subflows")
     Subflow_Bwd_Packets: int = Field(..., description="Number of packets in backward subflows")
@@ -89,6 +78,9 @@ class FeaturesInput(BaseModel):
     Idle_Std: float = Field(..., description="Standard deviation of idle periods")
     Idle_Max: float = Field(..., description="Maximum duration of idle periods")
     Idle_Min: float = Field(..., description="Minimum duration of idle periods")
+    Source_Port: int = Field(..., description="Source Port of the flow") # Added
+    Protocol: int = Field(..., description="Protocol of the flow (e.g., 6 for TCP, 17 for UDP)") # Added
+    client_real_ip: str = Field("UNKNOWN", description="Real client IP, injected for context.")
 
 
 class PredictionOutput(BaseModel):

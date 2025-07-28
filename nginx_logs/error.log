@@ -1,0 +1,5 @@
+2025/07/27 11:39:22 [emerg] 1#1: unknown log format "main" in /etc/nginx/nginx.conf:17
+2025/07/27 11:40:46 [emerg] 1#1: host not found in upstream "apache-target" in /etc/nginx/conf.d/default.conf:8
+2025/07/27 11:43:03 [emerg] 1#1: host not found in upstream "apache-target" in /etc/nginx/conf.d/default.conf:8
+2025/07/27 12:08:18 [emerg] 1#1: host not found in upstream "apache-target" in /etc/nginx/conf.d/default.conf:8
+2025/07/27 22:02:03 [emerg] 1#1: host not found in upstream "apache-target" in /etc/nginx/conf.d/default.conf:8
