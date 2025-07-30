@@ -1,5 +1,3 @@
-# src/api/services/ml_service.py
-
 import joblib
 import pandas as pd
 import numpy as np
@@ -63,77 +61,47 @@ def load_ml_components():
 
 def predict_ddos_attack(features_data: Dict[str, Any]) -> Dict[str, Any]:
     """
-    Receives raw features (from API request), preprocesses them, and makes a prediction.
-
-    Args:
-        features_data (Dict[str, Any]): A dictionary of features as received from the API.
-
-    Returns:
-        Dict[str, Any]: Prediction results including label, confidence, probabilities,
-                        and 'real_client_ip_for_alert' for context.
+    Receives raw features (from API request) and makes a mock prediction.
+    This bypasses the trained model to demonstrate the workflow.
     """
-    # Verifica se todos os componentes de ML foram carregados
-    if ml_model is None or ml_scaler is None or ml_label_encoder is None or ml_feature_order is None: # <<-- Inclui ml_feature_order
-        raise RuntimeError("ML components not loaded. Call load_ml_components() first.")
-
     try:
-        # Extrai o IP real do cliente que foi injetado pelo n8n
-        client_real_ip = features_data.get("client_real_ip", "UNKNOWN_IP_FROM_API") # <<-- NOVO: Captura o IP real
+        # Captura o IP real do cliente que foi injetado pelo n8n
+        client_real_ip = features_data.get("client_real_ip", "UNKNOWN_IP_FROM_API")
 
-        # --- Constrói o DataFrame de entrada para o modelo (APENAS com as features esperadas) ---
-        ordered_features = {}
-        # Itera pela lista de nomes de features que o modelo ESPERA (carregada de ml_feature_order)
-        for col_name in ml_feature_order: 
-            # Converte o nome da feature (que está no formato original do treino, ex: "Destination Port")
-            # para o formato que a Pydantic/JSON usa (ex: "Destination_Port")
-            pydantic_key = col_name.replace(' ', '_').replace('/', '_').replace('.', '_')
-            
-            # Pega o valor do dicionário de entrada (features_data)
-            # Se o campo não existir na entrada (o que pode acontecer se o n8n não o enviou), usa 0 como default.
-            # É CRÍTICO que o valor default (0) seja compatível com a feature.
-            value = features_data.get(pydantic_key, 0) 
+        # --- LÓGICA MOCK DE PREDIÇÃO ---
+        # Para demonstrar a API fazendo uma "decisão", vamos usar uma regra simples
+        # baseada na feature 'Total_Fwd_Packets', que o n8n vai mockar.
 
-            # Tratamento de valores nulos/infinitos na entrada da API, conforme feito no treino
-            if value is None:
-                value = np.nan
-            elif isinstance(value, (int, float)):
-                if value == float('inf') or value == -float('inf'):
-                    value = np.nan
-            
-            ordered_features[col_name] = value # Guarda o valor com o NOME ORIGINAL DA FEATURE (como o modelo espera)
+        # Pega o valor da feature do JSON de entrada.
+        # O get() é usado para evitar erros caso a feature não esteja lá.
+        total_fwd_packets = features_data.get("Total_Fwd_Packets", 0)
 
-        # Converte para DataFrame. O Pandas manterá a ordem das colunas, essencial para scikit-learn
-        input_df = pd.DataFrame([ordered_features])
-        
-        # Tratamento de valores especiais (NaN/Infinity) novamente, por segurança.
-        input_df.replace([np.inf, -np.inf], np.nan, inplace=True)
-        input_df.fillna(0, inplace=True) # Preenche NaNs com 0, como no treino
+        # Define um limiar para a decisão da IA mockada.
+        # Se o número de pacotes for maior que 10, consideramos como ataque.
+        # Este é o nosso "padrão de ataque" simulado.
+        mock_threshold = 10 
 
+        if total_fwd_packets > mock_threshold:
+            predicted_label = 'ATTACK'
+            confidence = 0.95 # Alta confiança para o ataque simulado
+            message = "Anomalia de tráfego detectada! Alto volume de requisições."
+        else:
+            predicted_label = 'BENIGN'
+            confidence = 0.99 # Alta confiança para tráfego normal simulado
+            message = "Tráfego analisado e considerado normal."
 
-        # Escala as features de entrada usando o scaler carregado
-        X_processed = ml_scaler.transform(input_df)
-
-        # Faz a predição
-        prediction_numeric = ml_model.predict(X_processed)[0]
-        prediction_proba = ml_model.predict_proba(X_processed)[0].tolist()
-
-        # Converte a predição numérica de volta para o rótulo de texto
-        predicted_label = ml_label_encoder.inverse_transform([prediction_numeric])[0]
-        confidence = prediction_proba[prediction_numeric if prediction_numeric < len(prediction_proba) else 0]
-        
-        # Constrói a resposta da API
+        # A API ainda retorna a estrutura completa de predição, mesmo com valores mockados.
         response = {
             "prediction": predicted_label,
-            "confidence": round(confidence, 4),
-            "prediction_probabilities": {ml_label_encoder.classes_[i]: prob for i, prob in enumerate(prediction_proba)},
+            "confidence": confidence,
+            "prediction_probabilities": {"ATTACK": confidence, "BENIGN": 1.0 - confidence},
             "is_attack": bool(predicted_label == 'ATTACK'),
-            "message": "Analysis complete." if predicted_label != 'ATTACK' else f"Potential DDoS attack detected with {round(confidence*100, 2)}% confidence.",
-            "real_client_ip_for_alert": client_real_ip # <<-- INCLUI O IP REAL NA RESPOSTA DA API
+            "message": message,
+            "real_client_ip_for_alert": client_real_ip # Inclui o IP real na resposta da API
         }
-        
+
         return response
 
     except Exception as e:
-        print(f"Error during ML prediction: {e}")
-        # Retorna um erro HTTP 500 com detalhes do erro para depuração no n8n
-        raise # Isso re-lançará a exceção para o FastAPI tratar e retornar o 500
+        print(f"Error during mock ML prediction: {e}")
+        raise # Re-lança a exceção

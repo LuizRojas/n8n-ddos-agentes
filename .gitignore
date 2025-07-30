@@ -1,5 +1,6 @@
 __pycache__/
 apache_logs/
+nginx_logs/
 n8n_data/
 datasets/
 models/
