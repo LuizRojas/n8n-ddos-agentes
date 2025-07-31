@@ -97,8 +97,7 @@ O n8n automatiza todo o fluxo de detecção com os seguintes nós:
 2. **Read Binary File** – Lê `access.log` do Nginx.
 3. **Code (JavaScript)** – Extrai features dos logs e insere o IP real do atacante.
 4. **HTTP Request** – Envia dados para `http://ddos_ml_api:8000/api/v1/predict_ddos`.
-5. **Code (JS)** – Formata a resposta da IA.
-6. **Telegram** – Envia alerta ao usuário com o status da predição.
+5. **Telegram** – Envia alerta ao usuário com o status da predição.
 
 ---
 
